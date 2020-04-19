@@ -175,6 +175,7 @@ for list in new_data:
 #MAKING PREDICTIONS BASED ON NEW DATA
 predict = model2.predict(new_vector)
 print(predict)
+print(predict[0])
 
 
 
@@ -184,15 +185,34 @@ print(predict)
 app = Flask(__name__)
 Bootstrap(app)
 
+
+
+@app.route('/')
+def my_form():
+    return render_template('index.html')
+
 @app.route('/', methods=['GET', 'POST'])
 def predict():
     if request.method == 'POST':
         # get the form data
-        text = request.form['input']
+        text = request.form['input'] #this is the headline inputted in by the user
         # do your prediction here
         render_template('index.html', text=text)
-    return render_template('index.html')
+        x = []
+        x.append(word_tokenize(text))
+        stop = [[word for word in sentence if word not in stopwords]for sentence in x]
+        stem4 = [[stem(word) for word in headline] for headline in stop]
+        lower2 = [[word.lower() for word in headline] for headline in stem4]
+        two = [" ".join(x) for x in lower2]
+        new_vector2 = headline_bow.transform(two)
+        predict2 = model2.predict(new_vector2)
+        if predict2[0] == 1:
+            return ("This piece of news is true")
+        else:
+            return("This piece of news is false")
 
+
+    #return render_template('index.html')
 
 
 if __name__ == "__main__":
